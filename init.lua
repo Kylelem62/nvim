@@ -46,6 +46,8 @@ P.S. You can delete this when you're done too. It's your config now :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+vim.o.guifont = "Source Code Pro:h12"
+
 --Buffer switching/deleting
 vim.api.nvim_set_keymap('i', '<C-l>', 'copilot#Accept("<CR>")', {expr=true, silent=true})
 --Buffer switching/deleting
@@ -105,6 +107,7 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: First, some plugins that don't require any configuration
   'preservim/nerdtree',
+  'sindrets/diffview.nvim',
   { 'ggandor/leap.nvim', opts = {
         max_phase_one_targets = nil,
         highlight_unlabeled_phase_one_targets = false,
@@ -763,6 +766,48 @@ cmp.setup {
     { name = 'path' },
   },
 }
+local lspconfig = require 'lspconfig'
+local configs = require 'lspconfig.configs'
 
--- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
+if not configs.noir_lsp then
+  configs.noir_lsp = {
+    default_config = {
+      cmd = { 'C:/Users/MCS/source/repos/rift-lsp/target/debug/rift-lsp.exe', 'lsp' },
+      root_dir = lspconfig.util.root_pattern('.git'),
+      filetypes = { 'cs' },
+    },
+  }
+end
+lspconfig.noir_lsp.setup {}
+
+local cbuf_ns = vim.api.nvim_create_namespace('cbuf')
+
+vim.api.nvim_create_autocmd({"BufEnter","BufWinEnter","CursorMoved","CursorMovedI"}, {
+  callback = function ()
+    local offset = 50
+    local curs_ln= vim.api.nvim_win_get_cursor(0)[1] - 1
+    local cb = vim.api.nvim_get_current_buf();
+    local sp = vim.api.nvim_buf_get_option(cb,"tabstop");
+    local from = math.max(curs_ln-offset,0)
+    local to = curs_ln + offset
+    local lines = vim.api.nvim_buf_get_lines(0,from,to,false);
+    vim.api.nvim_buf_clear_namespace(0,cbuf_ns,0,-1)
+    for i,line in ipairs(lines) do
+      local row = from+i
+      if line ~= nil then
+        line = line:gsub("\t",string.rep(" ",sp))
+        local rel_row = math.abs(curs_ln+1-row)
+        local col = line:match("^%s*"):len()-4
+        local ln_len = tostring(rel_row):len()
+        col = col + 3 - ln_len
+        if col >= 0 then
+          vim.api.nvim_buf_set_extmark(0,cbuf_ns,row-1,0,{
+            id = row,
+            virt_text = {{tostring(rel_row),"LineNr"}},
+            virt_text_win_col = col
+          })
+	end
+      end
+    end
+  end
+})
