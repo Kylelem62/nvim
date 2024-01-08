@@ -792,6 +792,7 @@ vim.api.nvim_create_autocmd({"BufEnter","BufWinEnter","CursorMoved","CursorMoved
     local to = curs_ln + offset
     local lines = vim.api.nvim_buf_get_lines(0,from,to,false);
     vim.api.nvim_buf_clear_namespace(0,cbuf_ns,0,-1)
+    local last_valid_col = 0;
     for i,line in ipairs(lines) do
       local row = from+i
       if line ~= nil then
@@ -800,6 +801,11 @@ vim.api.nvim_create_autocmd({"BufEnter","BufWinEnter","CursorMoved","CursorMoved
         local col = line:match("^%s*"):len()-4
         local ln_len = tostring(rel_row):len()
         col = col + 3 - ln_len
+        if line:match("%S") == nil then
+          col = last_valid_col
+        else
+          last_valid_col = col;
+        end
         if col >= 0 then
           vim.api.nvim_buf_set_extmark(0,cbuf_ns,row-1,0,{
             id = row,
