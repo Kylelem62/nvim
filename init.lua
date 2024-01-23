@@ -55,24 +55,7 @@ vim.api.nvim_set_keymap('n', '<leader>b', '', {desc="[B]uffers"})
 vim.api.nvim_set_keymap('n', '<leader>bn', ':bnext<cr>', {desc="[N]ext Buffer"})
 vim.api.nvim_set_keymap('n', '<leader>bp', ':bprevious<cr>', {desc="[P]revious Buffer"})
 vim.api.nvim_set_keymap('n', '<leader>bd', ':bdelete<cr>', {desc="[C]lear Buffer"})
---Jump further
-vim.api.nvim_set_keymap('n', '<M-j>', '10j', { noremap = true, desc = "Move down." })
-vim.api.nvim_set_keymap('n', '<M-k>', '10k', { noremap = true, desc = "Move down." })
 
-vim.keymap.set('n', '<leader>f', '<esc>:w<cr>', { desc = '[F]ile Save ' })
-vim.keymap.set('n', '<leader>F', '<esc>:wq<cr>', { desc = '[F]ile Save & quit' })
-
-vim.api.nvim_set_keymap('i', 'jj', '<esc>', { noremap = true, desc = "Move down." })
-vim.api.nvim_set_keymap('i', 'jk', '<esc>:w<cr>', { noremap = true, desc = "Move down." })
-
-----Insert mode bindings
-vim.api.nvim_set_keymap('i', '<S-CR>', '<esc>o', {desc="Jump to new line."})
---Pair completion
-vim.api.nvim_set_keymap('i', '"', '""<left>', { noremap = true, desc = "Move down." })
-vim.api.nvim_set_keymap('i', '(', '()<left>', { noremap = true, desc = "Move down." })
-vim.api.nvim_set_keymap('i', '{', '{}<left>', { noremap = true, desc = "Move down." })
---Auto newline for curly braces
-vim.api.nvim_set_keymap('i', '{<cr>', '{<cr><cr><esc>O', { noremap = true, desc = "Move down." })
 --Allows movement with alt key from home row in insert mode
 vim.api.nvim_set_keymap('i', '<M-j>', '<down>', { noremap = true, desc = "Move down." })
 vim.api.nvim_set_keymap('i', '<M-k>', '<up>', { noremap = true, desc = "Move down." })
