@@ -48,6 +48,8 @@ vim.g.maplocalleader = ' '
 
 vim.o.guifont = "Source Code Pro:h12"
 
+vim.g.rust_recommended_style = false
+
 --Buffer switching/deleting
 vim.api.nvim_set_keymap('i', '<C-l>', 'copilot#Accept("<CR>")', {expr=true, silent=true})
 --Buffer switching/deleting
@@ -56,12 +58,18 @@ vim.api.nvim_set_keymap('n', '<leader>bn', ':bnext<cr>', {desc="[N]ext Buffer"})
 vim.api.nvim_set_keymap('n', '<leader>bp', ':bprevious<cr>', {desc="[P]revious Buffer"})
 vim.api.nvim_set_keymap('n', '<leader>bd', ':bdelete<cr>', {desc="[C]lear Buffer"})
 
+
 --Allows movement with alt key from home row in insert mode
 vim.api.nvim_set_keymap('i', '<M-j>', '<down>', { noremap = true, desc = "Move down." })
 vim.api.nvim_set_keymap('i', '<M-k>', '<up>', { noremap = true, desc = "Move down." })
 vim.api.nvim_set_keymap('i', '<M-h>', '<left>', { noremap = true, desc = "Move down." })
 vim.api.nvim_set_keymap('i', '<M-l>', '<right>', { noremap = true, desc = "Move down." })
 
+---- Auto indent on empty line.
+vim.keymap.set('n', 'i', function ()
+  return string.match(vim.api.nvim_get_current_line(), '%g') == nil
+         and 'cc' or 'i'
+end, {expr=true, noremap=true})
 --Set the fold mode to work with most indented languages
 vim.opt.foldmethod = "indent"
 vim.opt.foldenable = false
@@ -91,38 +99,64 @@ require('lazy').setup({
   -- NOTE: First, some plugins that don't require any configuration
   'preservim/nerdtree',
   'sindrets/diffview.nvim',
-  { 'ggandor/leap.nvim', opts = {
-        max_phase_one_targets = nil,
-        highlight_unlabeled_phase_one_targets = false,
-        max_highlighted_traversal_targets = 10,
-        case_sensitive = false,
-        equivalence_classes = { ' \t\r\n', },
-        substitute_chars = {},
-        safe_labels = 'sfnut/SFNLHMUGTZ?',
-        labels = 'sfnjklhodweimbuyvrgtaqpcxz/SFNJKLHODWEIMBUYVRGTAQPCXZ?',
-        special_keys = {
-          next_target = '<enter>',
-          prev_target = '<tab>',
-          next_group = '<space>',
-          prev_group = '<tab>',
-          multi_accept = '<enter>',
-          multi_revert = '<backspace>',
+  {
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    ---@type Flash.Config
+    opts = {
+      modes = {
+        char = {
+          enabled = false,
+          autohide = true,
+          jump_labels = true,
+          multi_line = false
+          --keys = { }
         }
-  } },
+      }
+    },
+    -- stylua: ignore
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+    },
+  },
+  --{ 'ggandor/leap.nvim', opts = {
+  --      max_phase_one_targets = nil,
+  --      highlight_unlabeled_phase_one_targets = false,
+  --      max_highlighted_traversal_targets = 10,
+  --      case_sensitive = false,
+  --      equivalence_classes = { ' \t\r\n', },
+  --      substitute_chars = {},
+  --      safe_labels = 'sfnut/SFNLHMUGTZ?',
+  --      labels = 'sfnjklhodweimbuyvrgtaqpcxz/SFNJKLHODWEIMBUYVRGTAQPCXZ?',
+  --      special_keys = {
+  --        next_target = '<enter>',
+  --        prev_target = '<tab>',
+  --        next_group = '<space>',
+  --        prev_group = '<tab>',
+  --        multi_accept = '<enter>',
+  --        multi_revert = '<backspace>',
+  --      }
+  --} },
   {
     "zbirenbaum/copilot.lua",
     cmd = "Copilot",
     build = ":Copilot auth",
     opts = {
-      suggestion = { enabled = true },
+      suggestion = {
+        enabled = true,
+        auto_trigger=true,
+      },
       panel = { enabled = false },
       filetypes = {
         markdown = true,
         help = true,
+        ["*"] = true
       },
     },
   },
-  
+
   'takac/vim-hardtime',
   'tpope/vim-surround',
   -- Git related plugins
@@ -251,14 +285,10 @@ require('lazy').setup({
       end,
     },
   },
-
   {
-    -- Theme inspired by Atom
-    'navarasu/onedark.nvim',
-    priority = 1000,
-    config = function()
-      vim.cmd.colorscheme 'onedark'
-    end,
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000
   },
 
   {
@@ -342,6 +372,16 @@ require('lazy').setup({
       'nvim-treesitter/nvim-treesitter-textobjects',
     },
     build = ':TSUpdate',
+    config = function ()
+      local configs = require("nvim-treesitter.configs")
+
+      configs.setup({
+          ensure_installed = { "c", "svelte", "typescript", "css", "lua", "vim", "vimdoc", "query", "elixir", "heex", "javascript", "html" },
+          sync_install = false,
+          highlight = { enable = true },
+          indent = { enable = true, disable = { "python", "rust" } },
+        })
+    end
   },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -358,6 +398,8 @@ require('lazy').setup({
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
 }, {})
+
+require('copilot').setup({})
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -401,6 +443,8 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+vim.cmd.colorscheme('catppuccin-mocha') 
+
 -- [[ Basic Keymaps ]]
 
 -- Keymaps for better default experience
@@ -417,7 +461,7 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnos
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 
-require('leap').create_default_mappings()
+--require('leap').create_default_mappings()
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
