@@ -379,7 +379,7 @@ require('lazy').setup({
           ensure_installed = { "c", "svelte", "typescript", "css", "lua", "vim", "vimdoc", "query", "elixir", "heex", "javascript", "html" },
           sync_install = false,
           highlight = { enable = true },
-          indent = { enable = true, disable = { "python", "rust" } },
+          indent = { enable = true, disable = { "python", "rust", "html" } },
         })
     end
   },
@@ -407,6 +407,9 @@ require('copilot').setup({})
 
 -- Set highlight on search
 vim.o.hlsearch = false
+
+vim.o.tabstop = 2
+vim.o.shiftwidth = 2
 
 -- Make hybrid line numbers default
 vim.wo.relativenumber = true
